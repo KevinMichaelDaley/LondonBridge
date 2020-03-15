@@ -151,7 +151,7 @@ public:
           K[j].resize(n * 4 + 4);
           s[j].resize(n * 4 + 4);
     };
-    constexpr double h = 1e-5;
+    constexpr double h = 1e-4;
     const int hpert=T/h;
     for (int ti = 0; ti < hpert; ti++) {
       double t=h*ti;
