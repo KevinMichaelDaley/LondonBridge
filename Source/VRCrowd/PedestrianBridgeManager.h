@@ -3,6 +3,7 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Engine/World.h"
 #include "WalkerParams.h"
 #include <vector>
 #include <thread>
@@ -47,6 +48,24 @@ public:
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   AActor* BridgeEntity;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  AActor* Template;
+
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  bool IsGenerateCrowd;
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  int Nx;
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  int Ny;
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  FVector BackLeft;
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  FVector FrontRight;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  TSubclassOf<APedestrian> PedestrianTemplateClass;
 protected:
   float time;
   std::mutex mtx;
@@ -82,4 +101,5 @@ public:
                     std::array<float, 5>& last_state);
   // Called every frame
   virtual void Tick(float DeltaTime) override;
+  virtual void BeginPlay() override;
 };

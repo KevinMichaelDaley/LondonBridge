@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <sstream>
 #include <vector>
 #define USE_STDERR_LOG 0
 #if USE_STDERR_LOG
@@ -30,6 +31,35 @@ APedestrianBridgeManager::APedestrianBridgeManager() {
   integrating_thread=nullptr;
   N=0;
   running=false;
+  
+           
+           
+}
+void APedestrianBridgeManager::BeginPlay(){
+  Super::BeginPlay();
+  float X0=std::min(BackLeft.X,FrontRight.X);
+  float Y0=std::min(BackLeft.Y,FrontRight.Y);
+  float Y1=std::max(FrontRight.Y,BackLeft.Y);
+  float X1=std::max(FrontRight.X,BackLeft.X);
+  if(IsGenerateCrowd){
+      int n=0;
+      for(int i=0; i<Nx; ++i){
+       for(int j=0; j<Ny; ++j){
+           float a=i/(float)Nx;
+           float b=j/(float)Ny;
+           FVector loc=FVector(a*(X1)+(1-a)*X0,b*Y1+(1-b)*Y0,0);
+            std::stringstream ss;
+            ss<<"Pedestrian_"<<(n);
+            FActorSpawnParameters parms;
+            parms.Template=Template;
+            parms.Name=FName(ss.str().c_str());
+            parms.SpawnCollisionHandlingOverride = 
+                ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+          if(Cast<APedestrian>(GetWorld()->SpawnActor<AActor>(PedestrianTemplateClass,loc, FRotator::ZeroRotator,parms))) n++;
+       }
+    }
+  }
 }
 
 APedestrianBridgeManager::~APedestrianBridgeManager() { 
