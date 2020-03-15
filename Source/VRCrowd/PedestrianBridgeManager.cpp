@@ -74,7 +74,7 @@ bool APedestrianBridgeManager::IsSwitchFoot(APedestrian *walker) {
 }
 void APedestrianBridgeManager::InitializePedestrian(APedestrian *walker) {
   if(walker->RandomizeFrequency){
-      walker->VerticalBaseFreq_omega+=walker->FrequencyMismatch*(rand()%100-50)*0.005;
+      walker->VerticalBaseFreq_omega+=walker->FrequencyMismatch*(rand()%100-50)*0.005*walker->VerticalBaseFreq_omega;
   }
   if(walker->RandomizePhase){
       walker->WhichFoot=rand()%2;
@@ -95,10 +95,9 @@ void APedestrianBridgeManager::InitializePedestrian(APedestrian *walker) {
                             walker->Mass,
                             walker->COMDistanceFromFoot_L, walker->ForwardSpeed};
   FVector4 st = walker->InitialSimulationState;
-  float ui=walker->WhichFoot?walker->FootTargetR.X/100.0+st.X:walker->FootTargetL.X/100.0+st.X;
+  float ui=walker->WhichFoot?-walker->FootTargetR.X/100.0+st.X:-walker->FootTargetL.X/100.0+st.X;
   float L=walker->COMDistanceFromFoot_L;
   float f=walker->VerticalBaseFreq_omega;
-  st.W=ui * std::sqrt(9.8/L) * std::tanh(1 / f *  std::sqrt(9.8/L));
   state_v0[sys->X_INDEX(ID)] = st.X;
   state_v0[sys->V_INDEX(ID)] = st.Y;
   state_v0[sys->Y_INDEX(ID)] = st.Z;
@@ -113,18 +112,6 @@ void APedestrianBridgeManager::InitializePedestrian(APedestrian *walker) {
   walker->time = time;
   walker->tprev=std::max(0.0f,tnext_v0[ID]-0.5f/Params[ID].omegal);
   DEBUGLOG("Initialized walker %i\n", ID);
-}
-void APedestrianBridgeManager::integrate_static(float DeltaTime, APedestrianBridgeManager* inst){
-    float time1=inst->time;
-    if(inst->running){
-            inst->sys->integrate(DeltaTime, inst->Params, inst->BridgeDampingVertical,
-                   inst->BridgeFrequencyVertical, inst->BridgeMass, inst->BridgeDampingLateral,
-                   inst->BridgeFrequencyLateral, (inst->state), (inst->u), (inst->bmin), (inst->tnext),time1,true, inst->UseFullVerticalModel,inst->N);
-                time1+=DeltaTime;
-                inst->time=time1;
-            }
-                    
-    
 }
 void APedestrianBridgeManager::GetLastState(APedestrian *walker,
                                             float DeltaTime,
@@ -154,10 +141,12 @@ void APedestrianBridgeManager::Tick(float DeltaTime) {
       tnext1=tnext_v1.data();
       running=true;
   }
-  integrate_static(DeltaTime, this);
-  Super::Tick(DeltaTime);
   if (N == 0 or MaxID.load() == 0)
     return;
+  sys->integrate(DeltaTime, Params, BridgeDampingVertical,
+                   BridgeFrequencyVertical, BridgeMass, BridgeDampingLateral,
+                   BridgeFrequencyLateral, (state), (u), (bmin), (tnext),time,true, UseFullVerticalModel,N);
+  Super::Tick(DeltaTime);
   if (time-TimeStart<1e-4) {
     state[0] = BridgeInitialState.X;
     state[1] = BridgeInitialState.Y;
@@ -165,12 +154,12 @@ void APedestrianBridgeManager::Tick(float DeltaTime) {
     state[3] = BridgeInitialState.W;
   }
   DEBUGLOG("Ticking with N=%lu\n", Params.size());
-  DEBUGLOG("...Integrated for T=%f", DeltaTime);
-  next_frame_time = next_frame_time + DeltaTime;
+  DEBUGLOG("...Integrated for T=%f, dt=%f\n", time, DeltaTime);
+  time = time + DeltaTime;
   if(BridgeEntity!=nullptr){
       FVector bridgeloc=BridgeEntity->GetActorLocation();
-      bridgeloc.X=state[2];
-      bridgeloc.Z=state[0];
+      bridgeloc.X+=state[3]*DeltaTime;
+      bridgeloc.Z+=state[1]*DeltaTime;
       BridgeEntity->SetActorLocation(bridgeloc);
   }
 }

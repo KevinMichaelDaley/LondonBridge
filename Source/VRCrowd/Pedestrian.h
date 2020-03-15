@@ -78,6 +78,7 @@ public:
 protected:
   FVector FootTargetL0;
   FVector FootTargetR0;
+  FVector StanceFoot0;
   float refy;
   bool not_ref_added;
   // Called when the game starts or when spawned

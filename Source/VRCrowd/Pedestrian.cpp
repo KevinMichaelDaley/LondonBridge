@@ -23,10 +23,11 @@ void APedestrian::BeginPlay() {
   }
   ID = Manager->AddNewPedestrian();
   Manager->InitializePedestrian(this);
-  FootTargetR0=FootTargetR;
-  FootTargetL0=FootTargetL;
+  FootTargetR0=FootTargetR+GetActorLocation();
+  FootTargetL0=FootTargetL+GetActorLocation();
   X0=GetActorLocation().X;
   Y0=GetActorLocation().Y;
+  StanceFoot0=WhichFoot?FootTargetL0:FootTargetR0;
   refy=(X0-XOffset);
   Z0=GetActorLocation().Z;
 }
@@ -48,11 +49,14 @@ void APedestrian::Tick(float DeltaTime) {
     X0=GetActorLocation().X;
     Y0=GetActorLocation().Y;
     Z0=GetActorLocation().Z;
+    StanceFoot0=StanceFoot;
     if(WhichFoot){ 
         FootTargetL0 = FootTargetL+GetActorLocation();
+        FootTargetL0.Z=0;
     }
     else{
         FootTargetR0 = FootTargetR+GetActorLocation();
+        FootTargetR0.Z=0;
     }
     u0=y[4];
     WhichFoot = !WhichFoot;
@@ -76,28 +80,31 @@ void APedestrian::Tick(float DeltaTime) {
 //  printf("%i %f %f\n", ID, y[0], y[2]);
  float a = std::fmod(y[0]/(VerticalStepWidth_p)+1,2)/2.0;
 // a=std::sqrt(std::sin(a*M_PI/2));
- float L=COMDistanceFromFoot_L*100;
-  COMVertical = std::cos(y[0])*L+L;
+ float L=COMDistanceFromFoot_L;
+ float p=VerticalStepWidth_p;
+  COMVertical = (L*100-std::cos(std::fmod(y[0],2*p)-p)*L*100);
   float tnext=TimeNextStep_tnext;
-  COMLateral = (y[2]-u);
-  COMSagittal = std::sqrt(std::max(0.0f, L*10000-COMVertical*COMVertical-COMLateral*COMLateral));
+  COMLateral = -(y[2]-u)*100;
+  COMSagittal = std::sqrt(std::max(0.0f, L*L*10000-COMVertical*COMVertical-COMLateral*COMLateral));
 
 //  COMVertical = StepHeight*std::sin(a)
 //    float a=std::sin(y[1]
     float Omegap=std::sqrt(9.81/COMDistanceFromFoot_L);
     float bmin=(1-2*WhichFoot)*LateralControlWidth_bmin;
-    float u2=(y[3]/Omegap+bmin+y[2]-u0);
-  float s0=std::sin(y[0])*L;
-  if (!WhichFoot) {
-        float u02=FootTargetL0.X-GetActorLocation().X;
-        FootTargetL = FVector(u2+u02, s0,
-                         -COMVertical);
+    float u2=(y[3]/Omegap+bmin);
+  float s0 = StanceFoot.Y-(2*a-1)*std::sin(p)*L*200-StanceFoot.Y-COMSagittal;
+
+  float u02=StanceFoot0.X-GetActorLocation().X;
+  if (WhichFoot) {
+        FootTargetL = FVector(-a*u2*100+(1-a)*u02, s0,
+                         0);
         FootTargetR=FootTargetR0-GetActorLocation();
   } else{
-        float u02=FootTargetR0.X-GetActorLocation().X;
-        FootTargetR = FVector((u2)+u02, s0,
-                        -COMVertical);
+        FootTargetR = FVector((-u2)*100+(1-a)*u02, s0,
+                        0);
         FootTargetL=FootTargetL0-GetActorLocation();
+        
+
   }
-  SetActorLocation(FVector(StanceFoot.X+COMLateral,Y0+COMSagittal,COMVertical),false,nullptr,ETeleportType::TeleportPhysics);
+  SetActorLocation(FVector(StanceFoot.X+COMLateral,StanceFoot.Y+COMSagittal,COMVertical),false,nullptr,ETeleportType::TeleportPhysics);
 }

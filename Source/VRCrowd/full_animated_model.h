@@ -111,7 +111,7 @@ public:
 
       double phiddot = (m * g - m * xddot) * L * sin(phi) - Mfunc;
 
-      dy[V_INDEX(i)] = phiddot;
+      dy[V_INDEX(i)] = 0.01*phiddot;
     }
     
 
@@ -123,9 +123,9 @@ public:
       Fsum += ws[i].m * F[i] / (M + msum);
     }
     double r = (msum / (M + msum));
-    dy[3] = (-Fsum - 2 * hl * y[3] - omegal * omegal * y[2]);
+    dy[3] = (Fsum - 2 * hl *omegal * y[3] - omegal * omegal * y[2]);
     for (int i = 0; i < n; ++i) {
-      dy[U_INDEX(i)] = F[i] - dy[3];
+      dy[U_INDEX(i)] = -F[i] - dy[3];
     }
     dy[2] = y[3];
   }
@@ -151,7 +151,7 @@ public:
           K[j].resize(n * 4 + 4);
           s[j].resize(n * 4 + 4);
     };
-    constexpr double h = 0.0001;
+    constexpr double h = 1e-5;
     const int hpert=T/h;
     for (int ti = 0; ti < hpert; ti++) {
       double t=h*ti;
