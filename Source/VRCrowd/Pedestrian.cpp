@@ -79,20 +79,21 @@ void APedestrian::Tick(float DeltaTime) {
  float u=y[4];
 //  printf("%i %f %f\n", ID, y[0], y[2]);
  float a = std::fmod(y[0]/(VerticalStepWidth_p)+1,2)/2.0;
+ float b = (std::fmod(y[0],VerticalStepWidth_p)+VerticalStepWidth_p)/2.0+0.5;
 // a=std::sqrt(std::sin(a*M_PI/2));
  float L=COMDistanceFromFoot_L;
  float p=VerticalStepWidth_p;
-  COMVertical = (L*100-std::cos(std::fmod(y[0],2*p)-p)*L*100);
+  COMVertical = (L*100-std::cos(std::fmod(y[0]-p,p))*L*100);
   float tnext=TimeNextStep_tnext;
   COMLateral = -(y[2]-u)*100;
-  COMSagittal = std::sqrt(std::max(0.0f, L*L*10000-COMVertical*COMVertical-COMLateral*COMLateral));
+  COMSagittal = std::sin(std::fmod(y[0]-p,p))*L*100*ForwardSpeed;
 
 //  COMVertical = StepHeight*std::sin(a)
 //    float a=std::sin(y[1]
     float Omegap=std::sqrt(9.81/COMDistanceFromFoot_L);
     float bmin=(1-2*WhichFoot)*LateralControlWidth_bmin;
     float u2=(y[3]/Omegap+bmin);
-  float s0 = StanceFoot.Y-(2*a-1)*std::sin(p)*L*200-StanceFoot.Y-COMSagittal;
+  float s0 =(2*b-1)*ForwardSpeed*L*100-COMSagittal;
 
   float u02=StanceFoot0.X-GetActorLocation().X;
   if (WhichFoot) {
