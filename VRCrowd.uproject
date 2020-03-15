@@ -1,0 +1,22 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{00042C14-08D7-C28D-5F79-EE9E42A8423E}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "VRCrowd",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
+		}
+	],
+	"TargetPlatforms": [
+		"PS4",
+		"WindowsNoEditor",
+		"LinuxNoEditor",
+		"LinuxAArch64NoEditor"
+	]
+}
