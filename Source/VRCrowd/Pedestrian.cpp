@@ -85,14 +85,14 @@ void APedestrian::Tick(float DeltaTime) {
  float p=VerticalStepWidth_p;
   COMVertical = (L*100-std::cos(std::fmod(y[0]-p,p))*L*100);
   float tnext=TimeNextStep_tnext;
-  COMLateral = (y[2]-u)*-10;
+  COMLateral = (y[2]-u)*-100;
   COMSagittal = std::sin(std::fmod(y[0]-p,p))*L*100*ForwardSpeed;
 
 //  COMVertical = StepHeight*std::sin(a)
 //    float a=std::sin(y[1]
     float Omegap=std::sqrt(9.81/COMDistanceFromFoot_L);
     float bmin=(1-2*WhichFoot)*LateralControlWidth_bmin;
-    float u2=(y[3]/Omegap+bmin+y[2]-u0)*-10;
+    float u2=(y[3]/Omegap+bmin+y[2]-u0)*-100;
   float s0 =(2*b-1)*ForwardSpeed*L*100-COMSagittal;
 
   float u02=StanceFoot0.X-GetActorLocation().X;

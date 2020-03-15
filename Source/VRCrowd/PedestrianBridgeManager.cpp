@@ -188,8 +188,8 @@ void APedestrianBridgeManager::Tick(float DeltaTime) {
   time = time + DeltaTime;
   if(BridgeEntity!=nullptr){
       FVector bridgeloc=BridgeEntity->GetActorLocation();
-      bridgeloc.X+=state[3]*DeltaTime;
-      bridgeloc.Z+=state[1]*DeltaTime;
+      bridgeloc.X=state[2]*100;
+      bridgeloc.Z=state[0]*100;
       BridgeEntity->SetActorLocation(bridgeloc);
   }
 }
