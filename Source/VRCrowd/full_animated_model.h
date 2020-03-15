@@ -63,7 +63,11 @@ public:
 
       double w = ws[i].omega;
       double mu = m / (M + m);
-      double l = ws[i].L;
+//     double l = ws[i].L;
+      double l = std::sqrt(std::max(sq(ws[i].L)-sq(y[Y_INDEX(i)]-u[i]),0.0));
+      if(l==0){
+          l=ws[i].L;
+      }
       double L = l;
       double lambda = 0.9 * m * l * l;
 
@@ -100,7 +104,10 @@ public:
       double dot_x = xdot;
       double w = ws[i].omega;
       double mu = m / (M + m);
-      double l = ws[i].L;
+      double l = std::sqrt(std::max(sq(ws[i].L)-sq(y[Y_INDEX(i)]-u[i]),0.0));
+      if(l==0){
+          l=ws[i].L;
+      }
       double L = l;
       double lambda = 0.9 * m * l * l;
       double w_g =(w*w) / g;
@@ -151,7 +158,7 @@ public:
           K[j].resize(n * 4 + 4);
           s[j].resize(n * 4 + 4);
     };
-    constexpr double h = 1e-3;
+    constexpr double h = 1e-4;
     const int hpert=T/h;
     for (int ti = 0; ti < hpert; ti++) {
       double t=h*ti;
