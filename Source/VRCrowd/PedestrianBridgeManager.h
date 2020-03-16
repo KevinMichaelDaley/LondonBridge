@@ -63,11 +63,24 @@ public:
   FVector BackLeft;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   FVector FrontRight;
-
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  int MaxNSteps;
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+  float OrderParameter;
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+  float BridgeLateral;
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+  float BridgeVertical;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   TSubclassOf<APedestrian> PedestrianTemplateClass;
 protected:
   float time;
+  float LastBridgePeriodEnd, FirstBridgePeriodEnd;
+  int NBridgePeriods;
+  float MaxBridgeAmplitudeLastPeriodVertical,
+        MaxBridgeAmplitudeLastPeriodLateral;
+  std::vector<float> StepPhases;
+  int NSteps;
   std::mutex mtx;
   float next_frame_time;
   float* state1;

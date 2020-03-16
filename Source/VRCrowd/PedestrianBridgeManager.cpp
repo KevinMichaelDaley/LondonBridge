@@ -31,12 +31,16 @@ APedestrianBridgeManager::APedestrianBridgeManager() {
   integrating_thread=nullptr;
   N=0;
   running=false;
-  
+  MaxBridgeAmplitudeLastPeriodVertical=MaxBridgeAmplitudeLastPeriodLateral=NBridgePeriods=NSteps=0; 
            
            
 }
 void APedestrianBridgeManager::BeginPlay(){
   Super::BeginPlay();
+  OrderParameter=0;
+  NSteps=0;
+  StepPhases.resize(MaxNSteps,0.0);
+  LastBridgePeriodEnd=0.0;
   float X0=std::min(BackLeft.X,FrontRight.X);
   float Y0=std::min(BackLeft.Y,FrontRight.Y);
   float Y1=std::max(FrontRight.Y,BackLeft.Y);
@@ -98,6 +102,11 @@ bool APedestrianBridgeManager::IsSwitchFoot(APedestrian *walker) {
   if(b){
       walker->tprev=walker->TimeNextStep_tnext;
       walker->TimeNextStep_tnext=tnext[ID];
+      if(time>30.0 && LastBridgePeriodEnd>0){
+          float BridgePeriod=(LastBridgePeriodEnd-FirstBridgePeriodEnd)/NBridgePeriods;
+          StepPhases[(NSteps++)%MaxNSteps]=(time-LastBridgePeriodEnd)*2*M_PI/BridgePeriod;
+      }
+          
   }
   return b;
 
@@ -183,9 +192,35 @@ void APedestrianBridgeManager::Tick(float DeltaTime) {
     state[2] = BridgeInitialState.Z;
     state[3] = BridgeInitialState.W;
   }
+  else if(state[2]<0.0 && state[3]<0.0){
+      if(LastBridgePeriodEnd>0){
+          NBridgePeriods++;
+      }
+      else{
+          FirstBridgePeriodEnd=time;
+      }
+      BridgeLateral=MaxBridgeAmplitudeLastPeriodLateral;
+      MaxBridgeAmplitudeLastPeriodLateral=0;
+      LastBridgePeriodEnd=time;
+  }
+  if(state[0]<0.0 && state[1]<0.0){
+      BridgeVertical=MaxBridgeAmplitudeLastPeriodVertical;
+      MaxBridgeAmplitudeLastPeriodVertical=0;
+  }
   DEBUGLOG("Ticking with N=%lu\n", Params.size());
   DEBUGLOG("...Integrated for T=%f, dt=%f\n", time, DeltaTime);
   time = time + DeltaTime;
+  float phase_s=0, phase_c=0;
+  if(NSteps>MaxNSteps){
+      for(int i=0; i<MaxNSteps; ++i){
+          float phi=StepPhases[i];
+          phase_s+=std::sin(phi)/MaxNSteps;
+          phase_c+=std::cos(phi)/MaxNSteps;
+      }
+  }
+  MaxBridgeAmplitudeLastPeriodLateral=std::max(MaxBridgeAmplitudeLastPeriodLateral, std::abs(state[2]));
+  MaxBridgeAmplitudeLastPeriodVertical=std::max(MaxBridgeAmplitudeLastPeriodVertical, std::abs(state[0]));
+  OrderParameter=std::sqrt(phase_s*phase_s+phase_c*phase_c);
   if(BridgeEntity!=nullptr){
       FVector bridgeloc=BridgeEntity->GetActorLocation();
       bridgeloc.X=state[2]*100;
