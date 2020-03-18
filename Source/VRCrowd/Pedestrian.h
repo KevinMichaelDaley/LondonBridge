@@ -3,9 +3,9 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Pedestrian.generated.h"
 #include <array>
 #include <vector>
-#include "Pedestrian.generated.h"
 
 class APedestrianBridgeManager;
 UCLASS()
@@ -77,6 +77,7 @@ public:
   float tprev;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   float TimeNextStep_tnext;
+
 protected:
   FVector FootTargetL0;
   FVector FootTargetR0;
@@ -87,7 +88,7 @@ protected:
   virtual void BeginPlay() override;
 
 public:
-  float X0,X00,u0,Y0,Z0;
+  float X0, X00, u0, Y0, Z0;
   // Called every frame
   virtual void Tick(float DeltaTime) override;
 };

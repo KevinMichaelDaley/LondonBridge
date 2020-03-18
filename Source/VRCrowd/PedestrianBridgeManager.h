@@ -2,13 +2,13 @@
 
 #pragma once
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
 #include "Engine/World.h"
-#include "WalkerParams.h"
-#include <vector>
-#include <thread>
-#include <mutex>
+#include "GameFramework/Actor.h"
 #include "PedestrianBridgeManager.generated.h"
+#include "WalkerParams.h"
+#include <mutex>
+#include <thread>
+#include <vector>
 template <typename T>
 int update_maximum(std::atomic<T> &maximum_value, T const &value) noexcept {
   T prev_value = maximum_value;
@@ -47,11 +47,10 @@ public:
   bool UseFullVerticalModel;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
-  AActor* BridgeEntity;
+  AActor *BridgeEntity;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
-  AActor* Template;
-
+  AActor *Template;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   bool IsGenerateCrowd;
@@ -73,24 +72,25 @@ public:
   float BridgeVertical;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   TSubclassOf<APedestrian> PedestrianTemplateClass;
+
 protected:
   float time;
   float LastBridgePeriodEnd, FirstBridgePeriodEnd;
   int NBridgePeriods;
   float MaxBridgeAmplitudeLastPeriodVertical,
-        MaxBridgeAmplitudeLastPeriodLateral;
+      MaxBridgeAmplitudeLastPeriodLateral;
   std::vector<float> StepPhases;
   int NSteps;
   std::mutex mtx;
   float next_frame_time;
-  float* state1;
-  float* state;
-  float* bmin1;
-  float* bmin;
-  float* u1;
-  float* u;
-  float* tnext1;
-  float* tnext;
+  float *state1;
+  float *state;
+  float *bmin1;
+  float *bmin;
+  float *u1;
+  float *u;
+  float *tnext1;
+  float *tnext;
   std::vector<WalkerParams> Params;
   std::vector<float> state_v0;
   std::vector<float> state_v1;
@@ -104,14 +104,15 @@ protected:
   std::atomic<int> MaxID;
   int N;
   bool running;
-  std::thread* integrating_thread;
-  static void integrate_static(float DeltaTime, APedestrianBridgeManager* inst);
+  std::thread *integrating_thread;
+  static void integrate_static(float DeltaTime, APedestrianBridgeManager *inst);
+
 public:
   int AddNewPedestrian();
   void InitializePedestrian(APedestrian *walker);
   bool IsSwitchFoot(APedestrian *walker);
   void GetLastState(APedestrian *walker, float DeltaTime,
-                    std::array<float, 5>& last_state);
+                    std::array<float, 5> &last_state);
   // Called every frame
   virtual void Tick(float DeltaTime) override;
   virtual void BeginPlay() override;
