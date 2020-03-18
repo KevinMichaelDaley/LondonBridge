@@ -21,6 +21,7 @@ APedestrianBridgeManager::APedestrianBridgeManager() {
   PrimaryActorTick.bCanEverTick = true;
   SetTickGroup(TG_LastDemotable);
   sys = new System();
+  SetActorTickInterval(0.04);
   time = TimeStart;
   for (int i = 0; i < 4; ++i) {
     state_v1.push_back(0);
@@ -37,6 +38,7 @@ APedestrianBridgeManager::APedestrianBridgeManager() {
 }
 void APedestrianBridgeManager::BeginPlay(){
   Super::BeginPlay();
+
   OrderParameter=0;
   NSteps=0;
   StepPhases.resize(MaxNSteps,0.0);
@@ -130,6 +132,7 @@ void APedestrianBridgeManager::InitializePedestrian(APedestrian *walker) {
                             walker->VerticalBaseFreq_omega,
                             walker->LateralBaseFreq_omega,
                             walker->LateralDiscontinuity_nu,
+                            walker->VerticalDamping_lambda,
                             walker->LateralDamping_lambda,
                             walker->Mass,
                             walker->COMDistanceFromFoot_L, walker->ForwardSpeed};

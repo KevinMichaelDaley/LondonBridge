@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #include "Pedestrian.h"
+#include "Net/UnrealNetwork.h"
 #include "PedestrianBridgeManager.h"
 #include <algorithm>
 #include <cmath>
@@ -11,6 +11,9 @@ APedestrian::APedestrian() {
   // Set this actor to call Tick() every frame.  You can turn this off to
   // improve performance if you don't need it.
   PrimaryActorTick.bCanEverTick = true;
+  bReplicates=true;
+  NetUpdateFrequency=20; 
+  MinNetUpdateFrequency=10; 
   ID = -1;
   not_ref_added=true;
 }
@@ -108,4 +111,10 @@ COMVertical = (L*100-std::cos(std::fmod(y[0]-p,p))*L*100);
 
   }
   SetActorLocation(FVector(StanceFoot.X+COMLateral,StanceFoot.Y+COMSagittal,COMVertical),false,nullptr,ETeleportType::TeleportPhysics);
+}
+void APedestrian::GetLifetimeReplicatedProps( TArray< FLifetimeProperty > & OutLifetimeProps ) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME( APedestrian, FootTargetL );
+    DOREPLIFETIME( APedestrian, FootTargetR );
 }

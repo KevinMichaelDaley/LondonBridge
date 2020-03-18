@@ -1,4 +1,6 @@
 #pragma once
+#ifndef WALKER_PARAMS_DEFINED
+#define WALKER_PARAMS_DEFINED
 struct WalkerParams {
   float a;
   float al;
@@ -7,8 +9,10 @@ struct WalkerParams {
   float omega;
   float omegal;
   float nu;
+  float lambda;
   float lambdal;
   float m;
   float L;
   float fwdspeed;
 };
+#endif

@@ -31,9 +31,9 @@ public:
   FVector4 InitialSimulationState;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   APedestrianBridgeManager *Manager;
-  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, replicated)
   FVector FootTargetL;
-  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, replicated)
   FVector FootTargetR;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   float VerticalAmplitudeOffset_a;
@@ -47,6 +47,8 @@ public:
   float VerticalBaseFreq_omega;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   float LateralBaseFreq_omega;
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  float VerticalDamping_lambda;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   float LateralDiscontinuity_nu;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
