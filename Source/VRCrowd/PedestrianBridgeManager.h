@@ -4,11 +4,11 @@
 #include "CoreMinimal.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
-#include "PedestrianBridgeManager.generated.h"
 #include "WalkerParams.h"
 #include <mutex>
 #include <thread>
 #include <vector>
+#include "PedestrianBridgeManager.generated.h"
 template <typename T>
 int update_maximum(std::atomic<T> &maximum_value, T const &value) noexcept {
   T prev_value = maximum_value;

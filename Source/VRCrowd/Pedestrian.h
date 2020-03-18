@@ -3,9 +3,9 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Pedestrian.generated.h"
 #include <array>
 #include <vector>
+#include "Pedestrian.generated.h"
 
 class APedestrianBridgeManager;
 UCLASS()
