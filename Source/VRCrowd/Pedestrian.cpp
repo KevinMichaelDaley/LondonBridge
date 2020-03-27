@@ -2,6 +2,7 @@
 #include "Pedestrian.h"
 #include "Net/UnrealNetwork.h"
 #include "PedestrianBridgeManager.h"
+#
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -10,37 +11,39 @@
 APedestrian::APedestrian() {
   // Set this actor to call Tick() every frame.  You can turn this off to
   // improve performance if you don't need it.
-  PrimaryActorTick.bCanEverTick = true;
-  bReplicates = true;
-  NetUpdateFrequency = 20;
-  MinNetUpdateFrequency = 10;
   ID = -1;
   not_ref_added = true;
+  PrimaryActorTick.bCanEverTick = true;
+  PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
 // Called when the game starts or when spawned
 void APedestrian::BeginPlay() {
-  Super::BeginPlay();
+    Super::BeginPlay();
   if (Manager == nullptr) {
     return;
   }
   ID = Manager->AddNewPedestrian();
   Manager->InitializePedestrian(this);
-  FootTargetR0 = FootTargetR + GetActorLocation();
-  FootTargetL0 = FootTargetL + GetActorLocation();
+  FootTargetR0 = FootTargetR + this->GetActorLocation();
+  FootTargetL0 = FootTargetL + this->GetActorLocation();
   X0 = GetActorLocation().X;
   Y0 = GetActorLocation().Y;
   StanceFoot0 = WhichFoot ? FootTargetL0 : FootTargetR0;
   refy = (X0 - XOffset);
   Z0 = GetActorLocation().Z;
+  //GetSkeletalMeshComponent()->SetComponentTickEnabled(true);
 }
 
 // Called every frame
-void APedestrian::Tick(float DeltaTime) {
-  Super::Tick(DeltaTime);
+void APedestrian::Tick(float DeltaTime0) {
+    
+    Super::Tick(DeltaTime0);
+    
   if (Manager == nullptr || ID < 0) {
     return;
   }
+  float DeltaTime = DeltaTime0 * Manager->SimulationSpeed;
   std::array<float, 5> y;
   Manager->GetLastState(this, DeltaTime, y);
   bool switch_foot = Manager->IsSwitchFoot(this);
@@ -63,7 +66,7 @@ void APedestrian::Tick(float DeltaTime) {
     u0 = y[4];
     WhichFoot = !WhichFoot;
   }
-  if (time < 20) {
+  if (time < 2) {
     return;
   } else if (not_ref_added) {
     if (switch_foot) {
@@ -80,23 +83,30 @@ void APedestrian::Tick(float DeltaTime) {
   }
   float u = y[4];
   //  printf("%i %f %f\n", ID, y[0], y[2]);
-  float a = std::fmod(y[0] / (VerticalStepWidth_p) + 1, 2) / 2.0;
+  float tnext = TimeNextStep_tnext;
+  
+
+  float a = 1.0 - (tnext - time) / (tnext - tprev);
+  if (tnext == tprev) {
+      a = 1.0;
+  }
   float b =
-      (std::fmod(y[0], VerticalStepWidth_p) + VerticalStepWidth_p) / 2.0 + 0.5;
+      a;
   // a=std::sqrt(std::sin(a*M_PI/2));
   float L = COMDistanceFromFoot_L;
   float p = VerticalStepWidth_p;
   //  COMVertical = a*Forward;
-  float tnext = TimeNextStep_tnext;
   COMLateral = (y[2] - u) * -100;
-  COMSagittal = std::sin(std::fmod(y[0] - p, p)) * L * 100 * ForwardSpeed;
-  COMVertical = (L * 100 - std::cos(std::fmod(y[0] - p, p)) * L * 100);
+  float steprate = std::min(1.0f, tnext - tprev);
+  COMSagittal = a*steprate * L * 100 * ForwardSpeed*VisualForwardSpeedScale;
+  COMVertical= (std::sin(a*3.14159))*L*100*StepHeight;
+ 
   //  COMVertical = StepHeight*std::sin(a)
   //    float a=std::sin(y[1]
   float Omegap = std::sqrt(9.81 / COMDistanceFromFoot_L);
   float bmin = (1 - 2 * WhichFoot) * LateralControlWidth_bmin;
   float u2 = (y[3] / Omegap + bmin + y[2] - u0) * -100;
-  float s0 = (1 - std::cos(b * M_PI)) * ForwardSpeed * L * 100 - COMSagittal;
+  float s0 = (2*b-1) * ForwardSpeed*steprate* VisualForwardSpeedScale * L * 100  - COMSagittal;
 
   float u02 = StanceFoot0.X - GetActorLocation().X;
   if (WhichFoot) {
@@ -109,10 +119,4 @@ void APedestrian::Tick(float DeltaTime) {
   SetActorLocation(FVector(StanceFoot.X + COMLateral,
                            StanceFoot.Y + COMSagittal, COMVertical),
                    false, nullptr, ETeleportType::TeleportPhysics);
-}
-void APedestrian::GetLifetimeReplicatedProps(
-    TArray<FLifetimeProperty> &OutLifetimeProps) const {
-  Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-  DOREPLIFETIME(APedestrian, FootTargetL);
-  DOREPLIFETIME(APedestrian, FootTargetR);
 }

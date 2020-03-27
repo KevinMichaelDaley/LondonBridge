@@ -5,11 +5,12 @@
 #include "GameFramework/Actor.h"
 #include <array>
 #include <vector>
+#include "Animation/SkeletalMeshActor.h"
 #include "Pedestrian.generated.h"
 
 class APedestrianBridgeManager;
 UCLASS()
-class VRCROWD_API APedestrian : public AActor {
+class VRCROWD_API APedestrian : public ASkeletalMeshActor {
   GENERATED_BODY()
 
 public:
@@ -27,13 +28,16 @@ public:
   int ID;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   float ForwardSpeed;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+      float VisualForwardSpeedScale;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   FVector4 InitialSimulationState;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   APedestrianBridgeManager *Manager;
-  UPROPERTY(EditAnywhere, BlueprintReadWrite, replicated)
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
   FVector FootTargetL;
-  UPROPERTY(EditAnywhere, BlueprintReadWrite, replicated)
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
   FVector FootTargetR;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   float VerticalAmplitudeOffset_a;

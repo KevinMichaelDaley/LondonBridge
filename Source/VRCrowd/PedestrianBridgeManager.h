@@ -7,6 +7,7 @@
 #include "WalkerParams.h"
 #include <mutex>
 #include <thread>
+#include <atomic>
 #include <vector>
 #include "PedestrianBridgeManager.generated.h"
 template <typename T>
@@ -42,10 +43,13 @@ public:
   float BridgeDampingLateral;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   float BridgeFrequencyLateral;
-
+  UPROPERTY(VisibleAnywhere)
+  TArray<APedestrian*> crowd;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   bool UseFullVerticalModel;
 
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  float CrowdInterval;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   AActor *BridgeEntity;
 
@@ -70,43 +74,42 @@ public:
   float BridgeLateral;
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
   float BridgeVertical;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+      float time;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+      FVector4 SimulationState;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+  int N;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   TSubclassOf<APedestrian> PedestrianTemplateClass;
 
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+      float SimulationSpeed;
+  
 protected:
-  float time;
+  
   float LastBridgePeriodEnd, FirstBridgePeriodEnd;
   int NBridgePeriods;
+  FVector SpawnLocation;
   float MaxBridgeAmplitudeLastPeriodVertical,
       MaxBridgeAmplitudeLastPeriodLateral;
   std::vector<float> StepPhases;
   int NSteps;
   std::mutex mtx;
   float next_frame_time;
-  float *state1;
-  float *state;
-  float *bmin1;
-  float *bmin;
-  float *u1;
-  float *u;
-  float *tnext1;
-  float *tnext;
+  std::vector<float> state, bmin, u, tnext;
+  FVector BridgeLocation0;
   std::vector<WalkerParams> Params;
-  std::vector<float> state_v0;
-  std::vector<float> state_v1;
-  std::vector<float> bmin_v0;
-  std::vector<float> bmin_v1;
-  std::vector<float> u_v0;
-  std::vector<float> u_v1;
-  std::vector<float> tnext_v0;
-  std::vector<float> tnext_v1;
   System *sys;
   std::atomic<int> MaxID;
-  int N;
   bool running;
   std::thread *integrating_thread;
   static void integrate_static(float DeltaTime, APedestrianBridgeManager *inst);
-
+  float timeLastAdd;
+  float state0prev, state0prevX;
 public:
   int AddNewPedestrian();
   void InitializePedestrian(APedestrian *walker);
